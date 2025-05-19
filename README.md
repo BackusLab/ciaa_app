@@ -13,7 +13,7 @@ Cysteine residues play key roles in protein structure and function and can serve
 * Matplotlib
 * Scikit-learn (ML models)
 * MDAnalysis (used for calculating HB)
-* Prody (for building biological units)
+* Prody (for building biological units; http://www.bahargroup.org/prody/manual/getprody.html)
 * Modeller (for building incomplete sidechains)
 * dssp (for SS & SASA of cysteines; https://swift.cmbi.umcn.nl/gv/dssp/index.html)
 * propka
@@ -24,5 +24,5 @@ Cysteine residues play key roles in protein structure and function and can serve
 conda create -n cysteine_reactivity python=3
 conda activate cysteine_reactivity
 conda install -c conda-forge -c salilab numpy scipy pandas matplotlib scikit-learn matplotlib \
-  pymol-open-source mdanalysis prody modeller propka notebook
+  pymol-open-source mdanalysis modeller propka notebook
 ```

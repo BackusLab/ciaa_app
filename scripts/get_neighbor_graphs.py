@@ -49,10 +49,6 @@ def get_pdb_details(pdb_files, rd, nd, aa, sa, at, wo):
   for i in range(len(pdb_files)):
 
     pdb = pdb_files[i]
-
-    # New PDB PDB2EXE
-    # PDB_Files reduced_pdb2exe
-
     new_pdb = pdb.replace('reduced_', '').replace('.pdb', '').upper()
 
     parser = Bio.PDB.PDBParser(QUIET=True) 
@@ -99,20 +95,15 @@ def get_pdb_details(pdb_files, rd, nd, aa, sa, at, wo):
     os.chdir(rd)
 
 def angle_between_vectors(v1, v2):
-    # Calculate the dot product
     dot_product = np.dot(v1, v2)
     
-    # Calculate the magnitudes (norms) of the vectors
     norm_v1 = np.linalg.norm(v1)
     norm_v2 = np.linalg.norm(v2)
     
-    # Calculate the cosine of the angle
     cosine_angle = dot_product / (norm_v1 * norm_v2)
     
-    # Ensure the cosine value is in the range [-1, 1]
     cosine_angle = np.clip(cosine_angle, -1, 1)
     
-    # Calculate the angle and convert it to degrees
     angle = np.arccos(cosine_angle)
     angle_degrees = np.degrees(angle)
     
@@ -123,7 +114,6 @@ def get_neighbors(pdb, model, chainid, segid, sa, atomid):
   try: 
     target_atom = model[chainid][segid][atomid]
   except KeyError:
-    print('KeyError', pdb)
     return []
   
   atoms  = Bio.PDB.Selection.unfold_entities(model, "A")
@@ -157,8 +147,6 @@ def get_neighbors(pdb, model, chainid, segid, sa, atomid):
 
 def write_file(file, header, close_atoms):
   out_file = open(file, 'w')
-
-  # out_file.write(header + '\n')
 
   for i in range(len(close_atoms)):
     current = close_atoms[i]
@@ -194,7 +182,6 @@ def main():
   nd = cd + '/neighbor_files_' + args.aa.lower()
 
   try:
-    # Create target Directory
     os.mkdir(nd)
     print("Directory " , nd ,  " Created ") 
   except FileExistsError:
@@ -207,7 +194,6 @@ def main():
   os.chdir(rd)
   target_pdbs = []
 
-  ## reduced_pdb2exe.pdb
   for i in range(len(pdb_list)):
     reduced_pdb = 'reduced_' + pdb_list[i].lower() + '.pdb'
     if (reduced_pdb in reduced_files) & (reduced_pdb.replace('.pdb', '_neighbors.csv') not in completed_files):
@@ -217,4 +203,5 @@ def main():
 
   get_pdb_details(target_pdbs, rd, nd, args.aa, args.sa, args.at, args.wo)
 
-main()
+if __name__ == "__main__":
+  main()

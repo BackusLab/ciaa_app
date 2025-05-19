@@ -91,8 +91,8 @@ def sort_isotop_excel_file(df):
 
   df_cleaned = df_cleaned[columns]
 
-  df_cleaned.to_excel('220505_isotop_pdb_cleaned.xlsx', engine='openpyxl', index=False)
-  df_dirty.to_excel('220505_isotop_pdb_dirty.xlsx', engine='openpyxl', index=False)
+  df_cleaned.to_excel('isotop_pdb_cleaned.xlsx', engine='openpyxl', index=False)
+  df_dirty.to_excel('isotop_pdb_dirty.xlsx', engine='openpyxl', index=False)
   
   return df_cleaned, df_dirty
 
@@ -167,36 +167,36 @@ def get_peptides():
           j = 0
 
           for row in protein_peptides.itertuples():
-          # We take only a fragment of the peptide i - 3:i:i + 3 because longer is 
-          # the peptide, higher are our chance to get have a missing residue in the PDB
-          start = row.position - 3 if row.position - 3 > 0 else 0
-          end = row.position + 3
-          selected_peptide = row.peptide[start:end + 1]
-          position_in_selected_peptide = row.position - start
-          
-          sel = p.select('ca sequence "%s"' % selected_peptide)
-          
-          if sel is not None:
-            # The sequence can match in multiple chainids
-            current_chainids = list(dict.fromkeys(sel.getChids()))
-            i += 1
+            # We take only a fragment of the peptide i - 3:i:i + 3 because longer is 
+            # the peptide, higher are our chance to get have a missing residue in the PDB
+            start = row.position - 3 if row.position - 3 > 0 else 0
+            end = row.position + 3
+            selected_peptide = row.peptide[start:end + 1]
+            position_in_selected_peptide = row.position - start
             
-            for chainid in current_chainids:
-              tmp_sel = sel.select('chid %s' % chainid)
+            sel = p.select('ca sequence "%s"' % selected_peptide)
+            
+            if sel is not None:
+              # The sequence can match in multiple chainids
+              current_chainids = list(dict.fromkeys(sel.getChids()))
+              i += 1
               
-              if tmp_sel.getResnames()[position_in_selected_peptide] == 'CYS':
-                  data.append((protein, row.uniprot_resid, pdb, row.peptide, row.position,
-                               tmp_sel.getResnums()[position_in_selected_peptide], 
-                               tmp_sel.getChids()[position_in_selected_peptide],
-                               row.ratio_mean, row.ratio_sd, row.ratio_count))
-      
-                  j += 1
-              else:
-                  print('ERROR             : position is not Cys for %s' % pdb)
+              for chainid in current_chainids:
+                tmp_sel = sel.select('chid %s' % chainid)
+                
+                if tmp_sel.getResnames()[position_in_selected_peptide] == 'CYS':
+                    data.append((protein, row.uniprot_resid, pdb, row.peptide, row.position,
+                                 tmp_sel.getResnums()[position_in_selected_peptide], 
+                                 tmp_sel.getChids()[position_in_selected_peptide],
+                                 row.ratio_mean, row.ratio_sd, row.ratio_count))
+        
+                    j += 1
+                else:
+                    print('ERROR             : position is not Cys for %s' % pdb)
       
           print('Peptide identified: %d (in %d chain(s))' % (i, j))
     
-    print("")
+      print("")
 
   df.sort_values(by=['protein', 'uniprot_resid', 'pdb', 'resid', 'chainid', 'ratio_mean'], inplace=True)
   df = df[~df[['protein', 'uniprot_resid', 'pdb', 'resid', 'chainid']].apply(frozenset, axis=1).duplicated()]
@@ -363,10 +363,10 @@ def get_complete(current_dir, pdb_dir):
         additives_selection_str = ' or '.join(['resname %s' % a for a in ADDITIVES])
         not_water_additives = b.select('not (resname WAT or resname HOH or %s)' % additives_selection_str)
         
-        Write PDBs without water and additives
+        # Write PDBs without water and additives
         writePDB('%s_%d.pdb' % ( pdb.lower(), i + 1), not_water_additives)
         
-        Write water molecules
+        # Write water molecules
         water = b.select('resname WAT or resname HOH')
         try:
           writePDB('%s_%d_water.pdb' % ( pdb.lower(), i + 1), water)
@@ -374,7 +374,7 @@ def get_complete(current_dir, pdb_dir):
         except TypeError:
           pass
             
-        Write additives
+        # Write additives
         additives = b.select(additives_selection_str)
         try:
           writePDB('%s_%d_additives.pdb' % ( pdb.lower(), i + 1), additives)
@@ -640,7 +640,7 @@ def select():
 
 def main():
   # Read experimental isoTOP cysteine reactivity measurements
-  df = pd.read_excel('isotop_pdb.xlsx', engine='openpyxl')
+  df = pd.read_excel('../data/isotop_pdb.xlsx', engine='openpyxl')
 
   # Extract data from excel file
   df_cleaned, df_dirty = sort_isotop_excel_file(df)

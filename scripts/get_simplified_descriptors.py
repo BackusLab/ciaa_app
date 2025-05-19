@@ -1,8 +1,3 @@
-# Date Created: 230424
-# Date Modified: 240325
-# Author: Lisa Boatner
-# Description: OHE descriptors for ML.
-
 import glob
 import re
 import sys, os, argparse
@@ -219,7 +214,6 @@ def main():
   parser.add_argument('-wo', '--write_outfile', dest='wo', nargs='?', default="True", type=str, help='default True')
   args = parser.parse_args()
 
-  # os.chdir(args.idir)
   cutoff = int(args.c)
 
   # os.chdir('data')
@@ -241,7 +235,6 @@ def main():
   descr_10_df = descr_10_df.drop(columns = ['steric_aas', 'saas'])
   print("SASA finished.")
 
-  # descr_10_df['steric_P_' + str(cutoff)] = (descr_10_df['steric_count'].astype(float) / descr_10_df['neighbor_count'].astype(float)) * 100
   descr_10_df = calculate_sterics(descr_10_df, cutoff)
   descriptors_10_df = descr_10_df.copy()
   print("Sterics finished.")
@@ -323,8 +316,6 @@ def main():
   desc_10_df = prox_3D_df.copy()
 
   dropped_columns_10 = [
-    # 'saas',
-    # 'saas_P',
     '2D_down',
     '2D_down_dist',
     '2D_up',
@@ -339,10 +330,8 @@ def main():
 
   rename_columns = [
     'atom_count',
-	# 'neighbor_count',
 	'net_charge',
 	'hydrophobicity_kd',
-	# 'steric_count',
 	'P',
 	'ARO',
 	'ALI',

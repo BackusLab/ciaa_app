@@ -1,8 +1,3 @@
-# Date Created: 230321
-# Date Modified: 240220
-# Author: Lisa Boatner
-# Description: Compute descriptors from PDBs for ML.
-
 import Bio
 from Bio.PDB import *
 import numpy, os, sys, subprocess, argparse

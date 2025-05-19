@@ -640,7 +640,7 @@ def select():
 
 def main():
   # Read experimental isoTOP cysteine reactivity measurements
-  df = pd.read_excel('220505_isotop_pdb.xlsx', engine='openpyxl')
+  df = pd.read_excel('isotop_pdb.xlsx', engine='openpyxl')
 
   # Extract data from excel file
   df_cleaned, df_dirty = sort_isotop_excel_file(df)

@@ -1,7 +1,9 @@
 # ciaa_app
 
+Cysteine residues play key roles in protein structure and function and can serve as targets for chemical probes and even drugs. Chemoproteomic studies have revealed that heightened cysteine reactivity towards electrophilic probes, such as iodoacetamide alkyne (IAA), is indicative of likely residue functionality. However, while the cysteine coverage of chemoproteomic studies has increased substantially, these methods still only provide a partial assessment of proteome-wide cysteine reactivity, with cysteines from low abundance proteins and tough-to-detect peptides still largely refractory to chemoproteomic analysis. Here we integrate cysteine chemoproteomic reactivity datasets with structure-guided computational analysis to delineate key structural features of proteins that favor elevated cysteine reactivity towards IAA.
 
-An insilico structure-based approach to identify IAA reactive cysteines.
+## About: 
+[https://chemrxiv.org/engage/chemrxiv/article-details/678722edfa469535b90fe695](https://chemrxiv.org/engage/api-gateway/chemrxiv/assets/orp/resource/item/67872b91fa469535b910ab1e/original/supporting-information.pdf)
 
 ## Requirements
 * Python 3
@@ -14,7 +16,6 @@ An insilico structure-based approach to identify IAA reactive cysteines.
 * Prody (for building biological units)
 * Modeller (for building incomplete sidechains)
 * dssp (for SS & SASA of cysteines; https://swift.cmbi.umcn.nl/gv/dssp/index.html)
-* stride (for calculating secondary structure; http://webclu.bio.wzw.tum.de/stride/)
 * propka
 
 ## Installation

@@ -43,7 +43,7 @@ def read_reference_file(file):
   in_file.close()
   return pdb_list
 
-def get_pdb_details(pdb_files, rd, nd, aa, sa, at, wo):
+def get_pdb_details(pdb_files, rd, nd, aa, sa, at, dist, wo):
   count = 0
 
   for i in range(len(pdb_files)):
@@ -83,7 +83,7 @@ def get_pdb_details(pdb_files, rd, nd, aa, sa, at, wo):
         res_dict[segid] = residue.get_resname()
         if (residue.get_resname() == aa):
           aa_list.append(segid)
-          temp_list = get_neighbors(new_pdb, model, chainid, segid, sa, at)
+          temp_list = get_neighbors(new_pdb, model, chainid, segid, sa, at, dist)
           master_list = master_list + temp_list
 
     header = 'identifier,pdb,resname,segid,atomid,vector,distance'
@@ -109,7 +109,7 @@ def angle_between_vectors(v1, v2):
     
     return angle_degrees
 
-def get_neighbors(pdb, model, chainid, segid, sa, atomid):
+def get_neighbors(pdb, model, chainid, segid, sa, atomid, dist):
 
   try: 
     target_atom = model[chainid][segid][atomid]
@@ -125,8 +125,7 @@ def get_neighbors(pdb, model, chainid, segid, sa, atomid):
   target_vector =  str(target_atom.get_vector()).replace(',', ' ').replace("Vector ", "").strip()
   close_atoms_details.append([main_identifier, pdb, 'CYS', segid, 'SG', target_vector[1:-1], 0, 0])
   
-  # change distance
-  close_atoms = ns.search(target_atom.coord, 10)
+  close_atoms = ns.search(target_atom.coord, float(dist))
   close_atoms.remove(target_atom)
 
   for atom in close_atoms:
@@ -160,26 +159,33 @@ def write_file(file, header, close_atoms):
 def main():
   parser = argparse.ArgumentParser()
   parser.add_argument('-i', '--input_pdb_file', dest='i', nargs='?', default="pdb_files.txt", type=str, help='default pdb_files.txt')
-  parser.add_argument('-pc', '--protein_column', dest='pc', nargs='?', default="0", type=str, help='default 0; options = pdbid')
+  parser.add_argument('-pc', '--protein_column', dest='pc', nargs='?', default="PDB", type=str, help='default 0; options = pdbid')
   parser.add_argument('-aa', '--amino_acid', dest='aa', nargs='?', default="CYS", type=str, help='default CYS')
   parser.add_argument('-sa', '--single_amino_acid', dest='sa', nargs='?', default="C", type=str, help='default C')
   parser.add_argument('-at', '--atom', dest='at', nargs='?', default="SG", type=str, help='default SG')
+  parser.add_argument('-d', '--distance', dest='d', nargs='?', default="10", type=str, help='default 10; options = 5')
   parser.add_argument('-o', '--output', dest='o', nargs='?', default="output", type=str, help='default output')
   parser.add_argument('-wo', '--write_outfile', dest='wo', nargs='?', default="True", type=str, help='default True')
   args = parser.parse_args()
 
   cd = os.getcwd()
 
-  pdb_df = pd.read_csv(args.i, sep = '\t')
+  pdb_df = pd.read_csv('data/' + args.i, sep = '\t')
   pdb_list = list(pdb_df[args.pc].unique())
   print(len(pdb_list))
   
-  rd = cd + '/reduced_files'
+  rd = cd + '/data/reduced_files'
+  try:
+      os.chdir(rd)
+  except Exception as e:
+      raise RuntimeError("Failed to change directory: {}".format(e))
+      sys.exit()
+
   os.chdir(rd)
   reduced_files = [f for f in os.listdir('.') if f.startswith("reduced_")]
 
   os.chdir(cd)
-  nd = cd + '/neighbor_files_' + args.aa.lower()
+  nd = cd + '/data/neighbor_files_' + args.aa.lower()
 
   try:
     os.mkdir(nd)
@@ -201,7 +207,7 @@ def main():
 
   print("Number of target pdbs: " + str(len(target_pdbs)))
 
-  get_pdb_details(target_pdbs, rd, nd, args.aa, args.sa, args.at, args.wo)
+  get_pdb_details(target_pdbs, rd, nd, args.aa, args.sa, args.at, args.d, args.wo)
 
 if __name__ == "__main__":
   main()

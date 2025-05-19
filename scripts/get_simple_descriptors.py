@@ -1,6 +1,6 @@
 import Bio
 from Bio.PDB import *
-import numpy, os, sys, subprocess, argparse
+import numpy, os, sys, subprocess, argparse, glob
 from os.path import isfile, join
 from Bio.PDB.DSSP import DSSP
 from pathlib import Path
@@ -403,11 +403,9 @@ def get_pdb_details(pdb_files, descriptor_files, dist_cutoff, cd, rd):
 
     # format 'reduced_pdbid.pdb'
     old_pdb = pdb_files[i]
-    # new_pdb = old_pdb.replace('reduced_pdb', '').replace('.pdb', '').upper()
     new_pdb = old_pdb.replace('reduced_', '').replace('.pdb', '').upper()
 
     # skip completed files
-    # if (old_pdb.replace('.pdb', '_descriptors.csv') in descriptor_files):
     if (old_pdb.replace('.pdb', '_' + str(dist_cutoff) + '_descriptors.csv') in descriptor_files):
       continue
     else:
@@ -437,7 +435,7 @@ def get_pdb_details(pdb_files, descriptor_files, dist_cutoff, cd, rd):
 
     # access dssp for secondary structure and saas
     try:
-      dssp = DSSP(model, old_pdb, dssp='/Users/lisamarieboatner/anaconda3/bin/mkdssp')
+      dssp = DSSP(model, old_pdb, dssp='/Users/user_name/anaconda3/bin/mkdssp')
 
     except:
       print('Error for DSSP in ' + old_pdb)
@@ -479,7 +477,7 @@ def get_pdb_details(pdb_files, descriptor_files, dist_cutoff, cd, rd):
       cysteine_list = get_cysteines(old_pdb, new_pdb, model, dssp, chainid, seq, cys_list, dist_cutoff, cd)
       master_list = master_list + cysteine_list
 
-    dd = cd + '/descriptor_files_' + str(dist_cutoff)
+    dd = cd + '/data/descriptor_files_' + str(dist_cutoff)
 
     os.chdir(dd)
 
@@ -511,8 +509,7 @@ def get_cysteines(old_pdb, new_pdb, model, dssp, chainid, seq, cys_list, dist_cu
     segid = list(residue.id)[1]
     identifier = new_pdb + '_' + chainid + '_C' + str(segid)
 
-    # nd = cd + '/neighbor_files'
-    nd = cd + '/neighbor_files_cys'
+    nd = cd + '/data/neighbor_files_cys'
 
     os.chdir(nd)
 
@@ -525,7 +522,7 @@ def get_cysteines(old_pdb, new_pdb, model, dssp, chainid, seq, cys_list, dist_cu
       neighbors_dict = {}
       print('neighbors file not found')
 
-    os.chdir(cd + '/reduced_files')
+    os.chdir(cd + '/data/reduced_files')
 
     if identifier in neighbors_dict.keys():
       current_neighbors = neighbors_dict[identifier]
@@ -618,12 +615,31 @@ def read_reference_csv_file(file):
   in_file.close()
   return pdb_list
 
+def write_simple_descriptors_file(output_name, dist, cd, dd):
+
+  os.chdir(dd)
+  output_filename = output_name.replace('.csv', '_' + dist + '.csv')
+  output_file = os.path.join(cd + '/data', output_filename)
+
+  csv_files = sorted(glob.glob(os.path.join(dd, "*.csv")))
+
+  with open(output_file, "w") as outfile:
+      for i, fname in enumerate(csv_files):
+          with open(fname, "r") as infile:
+              lines = infile.readlines()
+              if i == 0:
+                  outfile.writelines(lines)     
+              else:
+                  outfile.writelines(lines[1:]) 
+
 def main():
   cd = os.getcwd()
-  rd = cd + '/reduced_files'
+  rd = cd + '/data/reduced_files'
 
   parser = argparse.ArgumentParser()
   parser.add_argument('-d', '--distance', dest='d', nargs='?', default=10, type=str, help='default 10')
+  parser.add_argument('-o', '--output', dest='o', nargs='?', default="simple_descriptors.csv", type=str, help='default simple_descriptors.csv')
+  parser.add_argument('-wo', '--write_outfile', dest='wo', nargs='?', default="True", type=str, help='default True')
 
   args = parser.parse_args()
 
@@ -633,10 +649,9 @@ def main():
   os.chdir(rd)
   reduced_files = [f for f in os.listdir('.') if f.startswith("reduced_")]
 
-  dd = cd + '/descriptor_files_' + str(args.d)
+  dd = cd + '/data/descriptor_files_' + str(args.d)
 
   try:
-    # Create target Directory
     os.mkdir(dd)
     print("Directory " , dd ,  " Created ") 
   except FileExistsError:
@@ -647,6 +662,9 @@ def main():
   os.chdir(rd)
 
   master_list = get_pdb_details(reduced_files, descriptor_files, dist_cutoff, cd, rd)
+
+  if args.wo == "True":
+    write_simple_descriptors_file(args.o, args.d, cd, dd)
 
 if __name__ == "__main__":
   main()

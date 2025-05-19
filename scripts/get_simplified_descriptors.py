@@ -207,19 +207,20 @@ def get_new_columns(df, cutoff, rename_columns):
 def main():
 
   parser = argparse.ArgumentParser()
-  parser.add_argument('-idir', '--input_directory', dest='idir', nargs='?', default="/Users/lisamarieboatner/dropbox/cysteine_reactivity_data'", type=str, help='default current_directory, options: /Users/lisamarieboatner/dropbox/cysteine_reactivity_data')
-  parser.add_argument('-i', '--input', dest='i', nargs='?', default="input", type=str, help='default input')
-  parser.add_argument('-o', '--output', dest='o', nargs='?', default="output", type=str, help='default output_modified_descriptors_10.csv')
+  parser.add_argument('-idir', '--input_directory', dest='idir', nargs='?', default="data", type=str, help='default data')
+  parser.add_argument('-i', '--input', dest='i', nargs='?', default="simple_descriptors_10.csv", type=str, help='default simple_descriptors_10.csv')
+  parser.add_argument('-o', '--output', dest='o', nargs='?', default="simplified_descriptors.csv", type=str, help='default simplified_descriptors.csv')
   parser.add_argument('-c', '--cutoff', dest='c', nargs='?', default="10", type=str, help='default 10; options 5')
   parser.add_argument('-wo', '--write_outfile', dest='wo', nargs='?', default="True", type=str, help='default True')
   args = parser.parse_args()
 
   cutoff = int(args.c)
 
-  # os.chdir('data')
+  cd = os.getcwd()
+  os.chdir(args.idir)
+
   descr_10_df = pd.read_csv(args.i)
   descr_10_df = descr_10_df[descr_10_df['identifier'] != 'identifier']
-
   print("Read input.")
 
   descr_10_df['pdb'] = descr_10_df['identifier'].map(lambda x: str(x).split('_')[0].replace('PDB', ''))  
@@ -364,9 +365,9 @@ def main():
   d10_df.columns = new_columns_10
 
   empty_df = d10_df[d10_df.isna().any(axis=1)]
-  print(empty_df.shape)
 
-  d10_df.to_csv(args.o + '_modified_descriptors_' + str(args.c) + '.csv', index = False)
+  if args.wo == "True":
+    d10_df.to_csv(args.o.replace('.csv', '_' + args.c + '.csv'), index = False)
 
 if __name__ == "__main__":
   main()
